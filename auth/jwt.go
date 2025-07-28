@@ -8,11 +8,15 @@ import (
 
 var secretKey = []byte("your-256-bit-secret")
 
-func GenerateJWT(userID string) (string, error) {
-	claims := jwt.MapClaims{
-		"sub": userID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	}
+func GenerateJWT(username string) (string, error) {
+	claims := &CustomClaims{
+        Username: username,
+        RegisteredClaims: jwt.RegisteredClaims{
+            Subject:   username, // still include in 'sub'
+            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+            IssuedAt:  jwt.NewNumericDate(time.Now()),
+        },
+    }
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 

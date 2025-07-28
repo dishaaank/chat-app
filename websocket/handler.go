@@ -82,6 +82,7 @@ func HandleWebSocket(c *gin.Context) {
 			To:        incoming.To,
 			Content:   incoming.Content,
 			Timestamp: time.Now(),
+			IsPrivate: incoming.To != "",
 		}
 		_, err = mongo.MessageCollection.InsertOne(context.Background(), message)
 		if err != nil {
@@ -229,7 +230,12 @@ func GetChatHistory(c *gin.Context) {
 			},
 		}
 	} else {
-		filter = bson.M{"to": ""}
+		filter = bson.M{
+			"$and": []bson.M{
+				{"to": ""},
+				{"is_private": false},
+			},
+		}
 	}
 
 	cursor, err := mongo.MessageCollection.Find(context.Background(), filter)
